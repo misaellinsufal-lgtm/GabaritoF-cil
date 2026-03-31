@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "turma": {
+      "title": "Turma",
+      "description": "Uma turma de alunos",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Nome da turma"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "ID do professor dono da turma"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data de criação"
+        }
+      },
+      "required": ["name", "ownerId", "createdAt"]
+    },
+    "gabarito": {
+      "title": "Gabarito",
+      "description": "Gabarito de uma prova",
+      "type": "object",
+      "properties": {
+        "turmaId": {
+          "type": "string",
+          "description": "ID da turma associada"
+        },
+        "name": {
+          "type": "string",
+          "description": "Nome da prova/gabarito"
+        },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Lista de respostas corretas"
+        },
+        "choicesCount": {
+          "type": "integer",
+          "description": "Número de opções por questão"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "ID do professor dono do gabarito"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data de criação"
+        }
+      },
+      "required": ["turmaId", "name", "answers", "choicesCount", "ownerId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/turmas/{turmaId}": {
+      "schema": "turma",
+      "description": "Coleção de turmas"
+    },
+    "/gabaritos/{gabaritoId}": {
+      "schema": "gabarito",
+      "description": "Coleção de gabaritos"
+    }
+  }
+}
