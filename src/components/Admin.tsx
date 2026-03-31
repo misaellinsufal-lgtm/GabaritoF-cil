@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { AnswerKey, Turma, Gabarito } from '../types';
-import { Plus, Minus, Printer, ArrowLeft, Users, FileText, Save, Trash2, ChevronRight } from 'lucide-react';
-import { createTurma, createGabarito, subscribeToTurmas, subscribeToGabaritos } from '../lib/firebaseService';
+import { Plus, Minus, Printer, ArrowLeft, Users, FileText, Save, Trash2, ChevronRight, Edit } from 'lucide-react';
+import { createTurma, createGabarito, updateGabarito, deleteGabarito, subscribeToTurmas, subscribeToGabaritos } from '../lib/firebaseService';
 
 export function Admin({ onBack }: { onBack: () => void }) {
   const [view, setView] = useState<'turmas' | 'gabaritos' | 'create'>('turmas');
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [selectedTurma, setSelectedTurma] = useState<Turma | null>(null);
   const [gabaritos, setGabaritos] = useState<Gabarito[]>([]);
+  const [editingGabarito, setEditingGabarito] = useState<Gabarito | null>(null);
   
   // Create Gabarito State
   const [title, setTitle] = useState('Prova de Matemática');
@@ -59,12 +60,40 @@ export function Admin({ onBack }: { onBack: () => void }) {
     if (!selectedTurma) return;
     setIsSaving(true);
     try {
-      await createGabarito(selectedTurma.id, title, answers, numChoices);
+      if (editingGabarito) {
+        await updateGabarito(editingGabarito.id, title, answers, numChoices);
+      } else {
+        await createGabarito(selectedTurma.id, title, answers, numChoices);
+      }
       setView('gabaritos');
+      setEditingGabarito(null);
+      // Reset form
+      setTitle('Prova de Matemática');
+      setNumQuestions(20);
+      setNumChoices(5);
+      setAnswers(Array(20).fill('A'));
     } catch (error) {
       console.error("Error saving gabarito:", error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleEditGabarito = (g: Gabarito) => {
+    setEditingGabarito(g);
+    setTitle(g.name);
+    setNumQuestions(g.answers.length);
+    setNumChoices(g.choicesCount);
+    setAnswers(g.answers);
+    setView('create');
+  };
+
+  const handleDeleteGabarito = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este gabarito?')) return;
+    try {
+      await deleteGabarito(id);
+    } catch (error) {
+      console.error("Error deleting gabarito:", error);
     }
   };
 
@@ -159,6 +188,20 @@ export function Admin({ onBack }: { onBack: () => void }) {
                 </div>
                 <div className="flex gap-2">
                   <button 
+                    onClick={() => handleEditGabarito(g)}
+                    className="p-2 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
+                    title="Editar"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteGabarito(g.id)}
+                    className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                    title="Excluir"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                  <button 
                     onClick={() => handlePrint(g)}
                     className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                     title="Imprimir"
@@ -176,12 +219,20 @@ export function Admin({ onBack }: { onBack: () => void }) {
 
   const renderCreateGabarito = () => (
     <div className="space-y-6">
-      <button onClick={() => setView('gabaritos')} className="flex items-center text-gray-600 hover:text-gray-900">
+      <button 
+        onClick={() => {
+          setView('gabaritos');
+          setEditingGabarito(null);
+        }} 
+        className="flex items-center text-gray-600 hover:text-gray-900"
+      >
         <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
       </button>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Novo Gabarito para {selectedTurma?.name}</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          {editingGabarito ? 'Editar Gabarito' : `Novo Gabarito para ${selectedTurma?.name}`}
+        </h2>
         
         <div className="space-y-4 mb-8">
           <div>
@@ -273,7 +324,7 @@ export function Admin({ onBack }: { onBack: () => void }) {
           disabled={isSaving}
           className="w-full py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center justify-center transition-colors disabled:opacity-50"
         >
-          <Save className="w-5 h-5 mr-2" /> {isSaving ? 'Salvando...' : 'Salvar Gabarito'}
+          <Save className="w-5 h-5 mr-2" /> {isSaving ? 'Salvando...' : editingGabarito ? 'Atualizar Gabarito' : 'Salvar Gabarito'}
         </button>
       </div>
     </div>
@@ -297,54 +348,54 @@ export function Admin({ onBack }: { onBack: () => void }) {
       {/* Printable View */}
       {printingGabarito && (
         <div className="hidden print:block p-0 bg-white text-black w-full font-sans print-sheet">
-          <div className="p-8 h-[297mm] w-[210mm] relative bg-white overflow-hidden">
+          <div className="p-6 h-[297mm] w-[210mm] relative bg-white overflow-hidden flex flex-col">
             {/* Corner Markers (Fiducials) */}
-            <div className="absolute top-6 left-6 w-5 h-5 bg-black"></div>
-            <div className="absolute top-6 right-6 w-5 h-5 bg-black"></div>
-            <div className="absolute bottom-6 left-6 w-5 h-5 bg-black"></div>
-            <div className="absolute bottom-6 right-6 w-5 h-5 bg-black"></div>
+            <div className="absolute top-4 left-4 w-4 h-4 bg-black"></div>
+            <div className="absolute top-4 right-4 w-4 h-4 bg-black"></div>
+            <div className="absolute bottom-4 left-4 w-4 h-4 bg-black"></div>
+            <div className="absolute bottom-4 right-4 w-4 h-4 bg-black"></div>
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-4 border-b-2 border-black pb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-[8px] font-bold text-center leading-tight">LOGO<br/>GOV</div>
+            <div className="flex justify-between items-center mb-2 border-b-2 border-black pb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-[7px] font-bold text-center leading-tight">LOGO<br/>GOV</div>
                 <div>
-                  <h2 className="text-xs font-bold uppercase tracking-tight">Secretaria de Estado da Educação</h2>
-                  <h3 className="text-[10px] font-semibold text-gray-700 leading-none">AVALIAÇÃO DIAGNÓSTICA AL/2026</h3>
+                  <h2 className="text-[10px] font-bold uppercase tracking-tight">Secretaria de Estado da Educação</h2>
+                  <h3 className="text-[8px] font-semibold text-gray-700 leading-none">AVALIAÇÃO DIAGNÓSTICA AL/2026</h3>
                 </div>
               </div>
               <div className="text-right">
-                <h2 className="text-xs font-bold uppercase leading-none mb-1">{printingGabarito.name}</h2>
-                <p className="text-[9px] text-gray-500">Turma: {selectedTurma?.name}</p>
+                <h2 className="text-[10px] font-bold uppercase leading-none mb-0.5">{printingGabarito.name}</h2>
+                <p className="text-[8px] text-gray-500">Turma: {selectedTurma?.name}</p>
               </div>
             </div>
 
             {/* Info Section */}
-            <div className="grid grid-cols-2 gap-6 mb-6 text-[10px]">
-              <div className="space-y-2">
-                <div className="border-b border-black pb-0.5 flex items-end">
-                  <span className="font-bold mr-2 uppercase">Aluno(a):</span>
+            <div className="grid grid-cols-2 gap-4 mb-3 text-[9px]">
+              <div className="space-y-1.5">
+                <div className="border-b border-black pb-0 flex items-end">
+                  <span className="font-bold mr-1 uppercase">Aluno(a):</span>
                   <div className="flex-1 h-3"></div>
                 </div>
-                <div className="border-b border-black pb-0.5 flex items-end">
-                  <span className="font-bold mr-2 uppercase">Código:</span>
+                <div className="border-b border-black pb-0 flex items-end">
+                  <span className="font-bold mr-1 uppercase">Código:</span>
                   <div className="flex-1 h-3"></div>
                 </div>
               </div>
-              <div className="bg-gray-50 p-2 rounded border border-gray-200">
-                <h4 className="font-bold mb-0.5 uppercase text-[9px]">Instruções:</h4>
-                <ul className="text-[8px] list-disc pl-3 space-y-0.5">
-                  <li>Use caneta esferográfica azul ou preta.</li>
-                  <li>Preencha completamente o círculo da resposta.</li>
-                  <li>Não rasure e não use corretivo.</li>
+              <div className="bg-gray-50 p-1.5 rounded border border-gray-200">
+                <h4 className="font-bold mb-0 uppercase text-[8px]">Instruções:</h4>
+                <ul className="text-[7px] list-disc pl-3 flex flex-wrap gap-x-4">
+                  <li>Use caneta azul/preta.</li>
+                  <li>Preencha o círculo.</li>
+                  <li>Não rasure.</li>
                 </ul>
               </div>
             </div>
 
             {/* QR Code and Main Title */}
-            <div className="flex flex-col items-center mb-6">
-              <h2 className="text-xl font-black mb-3 tracking-[0.2em] uppercase">NÃO RASURE</h2>
-              <div className="p-3 border-2 border-black bg-white shadow-sm">
+            <div className="flex flex-col items-center mb-4">
+              <h2 className="text-sm font-black mb-1 tracking-[0.2em] uppercase">NÃO RASURE</h2>
+              <div className="p-2 border border-black bg-white">
                 <QRCode 
                   value={JSON.stringify({
                     id: printingGabarito.id,
@@ -352,25 +403,24 @@ export function Admin({ onBack }: { onBack: () => void }) {
                     a: printingGabarito.answers,
                     c: printingGabarito.choicesCount
                   } as AnswerKey)} 
-                  size={110} 
+                  size={80} 
                   level="M" 
                 />
               </div>
-              <p className="text-[9px] mt-1 font-mono font-bold">*{printingGabarito.id.slice(0, 12).toUpperCase()}*</p>
+              <p className="text-[7px] mt-0.5 font-mono font-bold">*{printingGabarito.id.slice(0, 12).toUpperCase()}*</p>
             </div>
 
             {/* Answer Bubbles Grid */}
-            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-3 gap-x-8' : 'grid-cols-2 gap-x-16'} gap-y-1.5 max-w-4xl mx-auto`}>
+            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-3 gap-x-6' : 'grid-cols-2 gap-x-12'} gap-y-1 max-w-4xl mx-auto flex-1`}>
               {printingGabarito.answers.map((_, i) => (
                 <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-0.5">
-                  <span className="font-bold text-[10px] w-4 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
-                  <div className="flex gap-1.5 sm:gap-2">
+                  <span className="font-bold text-[9px] w-4 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="flex gap-1">
                     {Array.from({ length: printingGabarito.choicesCount }).map((_, idx) => (
                       <div key={idx} className="flex flex-col items-center gap-0">
-                        <span className="text-[6px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
-                        <div className={`${printingGabarito.answers.length > 40 ? 'w-4 h-4' : 'w-5 h-5'} rounded-full border-2 border-black flex items-center justify-center`}>
-                          {/* Inner circle for visual guide */}
-                          <div className={`${printingGabarito.answers.length > 40 ? 'w-2.5 h-2.5' : 'w-3 h-3'} rounded-full border border-gray-100`}></div>
+                        <span className="text-[5px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
+                        <div className={`${printingGabarito.answers.length > 40 ? 'w-3.5 h-3.5' : 'w-4.5 h-4.5'} rounded-full border-[1.5px] border-black flex items-center justify-center`}>
+                          <div className={`${printingGabarito.answers.length > 40 ? 'w-2 h-2' : 'w-2.5 h-2.5'} rounded-full border border-gray-50`}></div>
                         </div>
                       </div>
                     ))}
@@ -380,8 +430,8 @@ export function Admin({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Footer */}
-            <div className="absolute bottom-10 left-0 right-0 text-center">
-              <p className="text-[8px] text-gray-400 uppercase tracking-widest">GabaritoFácil por Misael Lins • Sistema de Correção Instantânea</p>
+            <div className="mt-2 text-center">
+              <p className="text-[7px] text-gray-400 uppercase tracking-widest">GabaritoFácil por Misael Lins • Sistema de Correção Instantânea</p>
             </div>
           </div>
         </div>

@@ -7,7 +7,9 @@ import {
   onSnapshot,
   Timestamp,
   doc,
-  getDocFromServer
+  getDocFromServer,
+  updateDoc,
+  deleteDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Turma, Gabarito } from '../types';
@@ -89,6 +91,31 @@ export const createGabarito = async (turmaId: string, name: string, answers: str
     return docRef.id;
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
+  }
+}
+
+export const updateGabarito = async (id: string, name: string, answers: string[], choicesCount: number) => {
+  const path = `gabaritos/${id}`;
+  try {
+    const docRef = doc(db, 'gabaritos', id);
+    await updateDoc(docRef, {
+      name,
+      answers,
+      choicesCount,
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export const deleteGabarito = async (id: string) => {
+  const path = `gabaritos/${id}`;
+  try {
+    const docRef = doc(db, 'gabaritos', id);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
   }
 }
 
