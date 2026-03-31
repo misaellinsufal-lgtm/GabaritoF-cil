@@ -211,6 +211,20 @@ export function Admin({ onBack }: { onBack: () => void }) {
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+              <div className="flex gap-2 mt-2">
+                <button 
+                  onClick={() => setNumQuestions(50)}
+                  className={`text-[10px] px-2 py-1 rounded border transition-colors ${numQuestions === 50 ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}
+                >
+                  Padrão 50
+                </button>
+                <button 
+                  onClick={() => setNumQuestions(60)}
+                  className={`text-[10px] px-2 py-1 rounded border transition-colors ${numQuestions === 60 ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}
+                >
+                  Padrão 60
+                </button>
+              </div>
             </div>
             
             <div>
@@ -346,17 +360,17 @@ export function Admin({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Answer Bubbles Grid */}
-            <div className="grid grid-cols-2 gap-x-20 gap-y-4 max-w-2xl mx-auto">
+            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-3 gap-x-10' : 'grid-cols-2 gap-x-20'} gap-y-2 max-w-4xl mx-auto`}>
               {printingGabarito.answers.map((_, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-2">
-                  <span className="font-bold text-sm w-6 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
-                  <div className="flex gap-4">
+                <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-1">
+                  <span className="font-bold text-[11px] w-5 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="flex gap-2 sm:gap-3">
                     {Array.from({ length: printingGabarito.choicesCount }).map((_, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-1">
-                        <span className="text-[8px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
-                        <div className="w-7 h-7 rounded-full border-2 border-black flex items-center justify-center">
+                      <div key={idx} className="flex flex-col items-center gap-0.5">
+                        <span className="text-[7px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
+                        <div className={`${printingGabarito.answers.length > 40 ? 'w-5 h-5' : 'w-6 h-6'} rounded-full border-2 border-black flex items-center justify-center`}>
                           {/* Inner circle for visual guide */}
-                          <div className="w-5 h-5 rounded-full border border-gray-100"></div>
+                          <div className={`${printingGabarito.answers.length > 40 ? 'w-3 h-3' : 'w-4 h-4'} rounded-full border border-gray-100`}></div>
                         </div>
                       </div>
                     ))}
