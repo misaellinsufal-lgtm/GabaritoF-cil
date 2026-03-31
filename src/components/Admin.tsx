@@ -411,7 +411,7 @@ export function Admin({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Answer Bubbles Grid */}
-            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-3 gap-x-6' : 'grid-cols-2 gap-x-12'} gap-y-1 max-w-4xl mx-auto flex-1`}>
+            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-4 gap-x-4' : 'grid-cols-2 gap-x-12'} gap-y-1 max-w-4xl mx-auto flex-1`}>
               {printingGabarito.answers.map((_, i) => (
                 <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-0.5">
                   <span className="font-bold text-[9px] w-4 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
