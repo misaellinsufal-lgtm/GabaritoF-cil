@@ -12,12 +12,17 @@
   }
   body {
     background-color: white !important;
+    margin: 0;
+    padding: 0;
   }
   .print-sheet {
     width: 210mm;
-    min-height: 297mm;
-    padding: 10mm;
-    margin: 0 auto;
+    height: 297mm;
+    padding: 0;
+    margin: 0;
     background: white;
+    overflow: hidden;
+    page-break-after: avoid;
+    page-break-before: avoid;
   }
 }

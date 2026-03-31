@@ -297,43 +297,43 @@ export function Admin({ onBack }: { onBack: () => void }) {
       {/* Printable View */}
       {printingGabarito && (
         <div className="hidden print:block p-0 bg-white text-black w-full font-sans print-sheet">
-          <div className="p-10 min-h-screen relative border-[1px] border-gray-200">
+          <div className="p-8 h-[297mm] w-[210mm] relative bg-white overflow-hidden">
             {/* Corner Markers (Fiducials) */}
-            <div className="absolute top-8 left-8 w-6 h-6 bg-black"></div>
-            <div className="absolute top-8 right-8 w-6 h-6 bg-black"></div>
-            <div className="absolute bottom-8 left-8 w-6 h-6 bg-black"></div>
-            <div className="absolute bottom-8 right-8 w-6 h-6 bg-black"></div>
+            <div className="absolute top-6 left-6 w-5 h-5 bg-black"></div>
+            <div className="absolute top-6 right-6 w-5 h-5 bg-black"></div>
+            <div className="absolute bottom-6 left-6 w-5 h-5 bg-black"></div>
+            <div className="absolute bottom-6 right-6 w-5 h-5 bg-black"></div>
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-6 border-b-2 border-black pb-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-[10px] font-bold text-center leading-tight">LOGO<br/>GOV</div>
+            <div className="flex justify-between items-center mb-4 border-b-2 border-black pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-[8px] font-bold text-center leading-tight">LOGO<br/>GOV</div>
                 <div>
-                  <h2 className="text-sm font-bold uppercase tracking-tight">Secretaria de Estado da Educação</h2>
-                  <h3 className="text-xs font-semibold text-gray-700">AVALIAÇÃO DIAGNÓSTICA AL/2026</h3>
+                  <h2 className="text-xs font-bold uppercase tracking-tight">Secretaria de Estado da Educação</h2>
+                  <h3 className="text-[10px] font-semibold text-gray-700 leading-none">AVALIAÇÃO DIAGNÓSTICA AL/2026</h3>
                 </div>
               </div>
               <div className="text-right">
-                <h2 className="text-sm font-bold uppercase">{printingGabarito.name}</h2>
-                <p className="text-[10px] text-gray-500">Turma: {selectedTurma?.name}</p>
+                <h2 className="text-xs font-bold uppercase leading-none mb-1">{printingGabarito.name}</h2>
+                <p className="text-[9px] text-gray-500">Turma: {selectedTurma?.name}</p>
               </div>
             </div>
 
             {/* Info Section */}
-            <div className="grid grid-cols-2 gap-8 mb-8 text-xs">
-              <div className="space-y-3">
-                <div className="border-b border-black pb-1 flex items-end">
+            <div className="grid grid-cols-2 gap-6 mb-6 text-[10px]">
+              <div className="space-y-2">
+                <div className="border-b border-black pb-0.5 flex items-end">
                   <span className="font-bold mr-2 uppercase">Aluno(a):</span>
-                  <div className="flex-1 h-4"></div>
+                  <div className="flex-1 h-3"></div>
                 </div>
-                <div className="border-b border-black pb-1 flex items-end">
+                <div className="border-b border-black pb-0.5 flex items-end">
                   <span className="font-bold mr-2 uppercase">Código:</span>
-                  <div className="flex-1 h-4"></div>
+                  <div className="flex-1 h-3"></div>
                 </div>
               </div>
-              <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                <h4 className="font-bold mb-1 uppercase text-[10px]">Instruções:</h4>
-                <ul className="text-[9px] list-disc pl-3 space-y-1">
+              <div className="bg-gray-50 p-2 rounded border border-gray-200">
+                <h4 className="font-bold mb-0.5 uppercase text-[9px]">Instruções:</h4>
+                <ul className="text-[8px] list-disc pl-3 space-y-0.5">
                   <li>Use caneta esferográfica azul ou preta.</li>
                   <li>Preencha completamente o círculo da resposta.</li>
                   <li>Não rasure e não use corretivo.</li>
@@ -342,9 +342,9 @@ export function Admin({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* QR Code and Main Title */}
-            <div className="flex flex-col items-center mb-10">
-              <h2 className="text-2xl font-black mb-4 tracking-[0.2em] uppercase">NÃO RASURE</h2>
-              <div className="p-4 border-2 border-black bg-white shadow-sm">
+            <div className="flex flex-col items-center mb-6">
+              <h2 className="text-xl font-black mb-3 tracking-[0.2em] uppercase">NÃO RASURE</h2>
+              <div className="p-3 border-2 border-black bg-white shadow-sm">
                 <QRCode 
                   value={JSON.stringify({
                     id: printingGabarito.id,
@@ -352,25 +352,25 @@ export function Admin({ onBack }: { onBack: () => void }) {
                     a: printingGabarito.answers,
                     c: printingGabarito.choicesCount
                   } as AnswerKey)} 
-                  size={140} 
+                  size={110} 
                   level="M" 
                 />
               </div>
-              <p className="text-[10px] mt-2 font-mono font-bold">*{printingGabarito.id.slice(0, 12).toUpperCase()}*</p>
+              <p className="text-[9px] mt-1 font-mono font-bold">*{printingGabarito.id.slice(0, 12).toUpperCase()}*</p>
             </div>
 
             {/* Answer Bubbles Grid */}
-            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-3 gap-x-10' : 'grid-cols-2 gap-x-20'} gap-y-2 max-w-4xl mx-auto`}>
+            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-3 gap-x-8' : 'grid-cols-2 gap-x-16'} gap-y-1.5 max-w-4xl mx-auto`}>
               {printingGabarito.answers.map((_, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-1">
-                  <span className="font-bold text-[11px] w-5 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
-                  <div className="flex gap-2 sm:gap-3">
+                <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-0.5">
+                  <span className="font-bold text-[10px] w-4 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="flex gap-1.5 sm:gap-2">
                     {Array.from({ length: printingGabarito.choicesCount }).map((_, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-0.5">
-                        <span className="text-[7px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
-                        <div className={`${printingGabarito.answers.length > 40 ? 'w-5 h-5' : 'w-6 h-6'} rounded-full border-2 border-black flex items-center justify-center`}>
+                      <div key={idx} className="flex flex-col items-center gap-0">
+                        <span className="text-[6px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
+                        <div className={`${printingGabarito.answers.length > 40 ? 'w-4 h-4' : 'w-5 h-5'} rounded-full border-2 border-black flex items-center justify-center`}>
                           {/* Inner circle for visual guide */}
-                          <div className={`${printingGabarito.answers.length > 40 ? 'w-3 h-3' : 'w-4 h-4'} rounded-full border border-gray-100`}></div>
+                          <div className={`${printingGabarito.answers.length > 40 ? 'w-2.5 h-2.5' : 'w-3 h-3'} rounded-full border border-gray-100`}></div>
                         </div>
                       </div>
                     ))}
@@ -380,8 +380,8 @@ export function Admin({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Footer */}
-            <div className="absolute bottom-12 left-0 right-0 text-center">
-              <p className="text-[9px] text-gray-400 uppercase tracking-widest">Plataforma GabaritoFácil • Sistema de Correção Instantânea</p>
+            <div className="absolute bottom-10 left-0 right-0 text-center">
+              <p className="text-[8px] text-gray-400 uppercase tracking-widest">GabaritoFácil por Misael Lins • Sistema de Correção Instantânea</p>
             </div>
           </div>
         </div>

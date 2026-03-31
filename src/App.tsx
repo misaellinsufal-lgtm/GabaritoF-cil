@@ -62,8 +62,8 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
       <header className="bg-white border-b border-gray-200 p-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-blue-600 flex items-center">
-            <span className="mr-2">📝</span> OMR AI
+          <h1 className="text-xl font-bold text-blue-600">
+            GabaritoFácil por Misael Lins
           </h1>
           
           <div className="flex items-center gap-4">

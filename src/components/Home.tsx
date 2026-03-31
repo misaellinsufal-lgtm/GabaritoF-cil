@@ -9,7 +9,8 @@ export function Home({ onSelectMode }: { onSelectMode: (mode: 'admin' | 'teacher
           <BookOpen className="w-10 h-10" />
         </div>
         <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Gabarito<span className="text-blue-600">Fácil</span></h1>
-        <p className="text-lg text-gray-600">Crie gabaritos e corrija provas instantaneamente com a câmera do seu celular.</p>
+        <p className="text-lg text-gray-600 mb-2">Crie gabaritos e corrija provas instantaneamente com a câmera do seu celular.</p>
+        <p className="text-sm font-medium text-gray-400">Criado por Misael Lins</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
