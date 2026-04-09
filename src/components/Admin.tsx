@@ -371,24 +371,16 @@ export function Admin({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Info Section */}
-            <div className="grid grid-cols-2 gap-4 mb-3 text-[9px]">
-              <div className="space-y-1.5">
-                <div className="border-b border-black pb-0 flex items-end">
-                  <span className="font-bold mr-1 uppercase">Aluno(a):</span>
-                  <div className="flex-1 h-3"></div>
+            <div className="mb-4 text-[9px]">
+              <div className="space-y-2">
+                <div className="border-b border-black pb-0.5 flex items-end">
+                  <span className="font-bold mr-2 uppercase">Estudante:</span>
+                  <div className="flex-1 h-4"></div>
                 </div>
-                <div className="border-b border-black pb-0 flex items-end">
-                  <span className="font-bold mr-1 uppercase">Código:</span>
-                  <div className="flex-1 h-3"></div>
+                <div className="border-b border-black pb-0.5 flex items-end w-1/2">
+                  <span className="font-bold mr-2 uppercase">Turma:</span>
+                  <div className="flex-1 h-4"></div>
                 </div>
-              </div>
-              <div className="bg-gray-50 p-1.5 rounded border border-gray-200">
-                <h4 className="font-bold mb-0 uppercase text-[8px]">Instruções:</h4>
-                <ul className="text-[7px] list-disc pl-3 flex flex-wrap gap-x-4">
-                  <li>Use caneta azul/preta.</li>
-                  <li>Preencha o círculo.</li>
-                  <li>Não rasure.</li>
-                </ul>
               </div>
             </div>
 
@@ -411,16 +403,16 @@ export function Admin({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Answer Bubbles Grid */}
-            <div className={`grid ${printingGabarito.answers.length > 40 ? 'grid-cols-4 gap-x-4' : 'grid-cols-2 gap-x-12'} gap-y-1 max-w-4xl mx-auto flex-1`}>
+            <div className="grid grid-cols-5 gap-x-3 gap-y-1 max-w-5xl mx-auto flex-1">
               {printingGabarito.answers.map((_, i) => (
                 <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-0.5">
-                  <span className="font-bold text-[9px] w-4 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
-                  <div className="flex gap-1">
+                  <span className="font-bold text-[8px] w-3 text-gray-400">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="flex gap-0.5">
                     {Array.from({ length: printingGabarito.choicesCount }).map((_, idx) => (
                       <div key={idx} className="flex flex-col items-center gap-0">
-                        <span className="text-[5px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
-                        <div className={`${printingGabarito.answers.length > 40 ? 'w-3.5 h-3.5' : 'w-4.5 h-4.5'} rounded-full border-[1.5px] border-black flex items-center justify-center`}>
-                          <div className={`${printingGabarito.answers.length > 40 ? 'w-2 h-2' : 'w-2.5 h-2.5'} rounded-full border border-gray-50`}></div>
+                        <span className="text-[4px] font-bold text-gray-400">{String.fromCharCode(65 + idx)}</span>
+                        <div className="w-3.5 h-3.5 rounded-full border-[1.2px] border-black flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full border border-gray-50"></div>
                         </div>
                       </div>
                     ))}
