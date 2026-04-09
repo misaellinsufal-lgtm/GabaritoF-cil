@@ -1,0 +1,17 @@
+{
+  "name": "GabaritoFácil por Misael Lins",
+  "short_name": "GabaritoFácil",
+  "description": "Correção automática de cartões-resposta via câmera.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3413/3413535.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

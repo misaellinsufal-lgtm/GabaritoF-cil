@@ -1,5 +1,5 @@
 {
   "name": "GabaritoFácil por Misael Lins",
-  "description": "Aplicativo para criar gabaritos e corrigir provas automaticamente usando a câmera do celular.",
+  "description": "Sistema completo de correção automática de cartões-resposta via câmera, com gestão de turmas, provas e relatórios estatísticos.",
   "requestFramePermissions": ["camera"]
 }

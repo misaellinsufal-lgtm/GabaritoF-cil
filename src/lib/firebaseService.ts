@@ -7,22 +7,13 @@ import {
   onSnapshot,
   Timestamp,
   doc,
-  getDocFromServer,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  setDoc,
+  getDocs
 } from 'firebase/firestore';
-import { db } from '../firebase';
-import { Turma, Gabarito } from '../types';
-
-const getLocalUser = () => {
-  const saved = localStorage.getItem('omr_user');
-  return saved ? JSON.parse(saved) : null;
-};
-
-const getOwnerId = () => {
-  const user = getLocalUser();
-  return user ? `user-${user.username.toLowerCase()}` : 'anonymous';
-};
+import { auth, db } from '../firebase';
+import { Turma, Exam, Result } from '../types';
 
 enum OperationType {
   CREATE = 'create',
@@ -33,98 +24,52 @@ enum OperationType {
   WRITE = 'write',
 }
 
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: any;
-}
-
 function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
+  const errInfo = {
     error: error instanceof Error ? error.message : String(error),
-    authInfo: getLocalUser(),
+    userId: auth.currentUser?.uid,
     operationType,
     path
-  }
+  };
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
 
-export const testConnection = async () => {
-  try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if(error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration. ");
-    }
-  }
-}
-
+// Turmas
 export const createTurma = async (name: string) => {
-  const ownerId = getOwnerId();
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('User not authenticated');
+  
   const path = 'turmas';
   try {
     const docRef = await addDoc(collection(db, path), {
       name,
-      ownerId,
+      ownerId: userId,
       createdAt: Timestamp.now()
     });
     return docRef.id;
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, path);
   }
-}
+};
 
-export const createGabarito = async (turmaId: string, name: string, answers: string[], choicesCount: number) => {
-  const ownerId = getOwnerId();
-  const path = 'gabaritos';
+export const deleteTurma = async (id: string) => {
+  const path = `turmas/${id}`;
   try {
-    const docRef = await addDoc(collection(db, path), {
-      turmaId,
-      name,
-      answers,
-      choicesCount,
-      ownerId,
-      createdAt: Timestamp.now()
-    });
-    return docRef.id;
-  } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, path);
-  }
-}
-
-export const updateGabarito = async (id: string, name: string, answers: string[], choicesCount: number) => {
-  const path = `gabaritos/${id}`;
-  try {
-    const docRef = doc(db, 'gabaritos', id);
-    await updateDoc(docRef, {
-      name,
-      answers,
-      choicesCount,
-      updatedAt: Timestamp.now()
-    });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, path);
-  }
-}
-
-export const deleteGabarito = async (id: string) => {
-  const path = `gabaritos/${id}`;
-  try {
-    const docRef = doc(db, 'gabaritos', id);
-    await deleteDoc(docRef);
+    await deleteDoc(doc(db, 'turmas', id));
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, path);
   }
-}
+};
 
 export const subscribeToTurmas = (callback: (turmas: Turma[]) => void) => {
-  const ownerId = getOwnerId();
+  const userId = auth.currentUser?.uid;
+  if (!userId) return () => {};
+  
   const path = 'turmas';
   const q = query(
     collection(db, path),
-    where('ownerId', '==', ownerId),
+    where('ownerId', '==', userId),
     orderBy('createdAt', 'desc')
   );
 
@@ -137,25 +82,99 @@ export const subscribeToTurmas = (callback: (turmas: Turma[]) => void) => {
   }, (error) => {
     handleFirestoreError(error, OperationType.LIST, path);
   });
-}
+};
 
-export const subscribeToGabaritos = (turmaId: string, callback: (gabaritos: Gabarito[]) => void) => {
-  const ownerId = getOwnerId();
-  const path = 'gabaritos';
+// Exams (Provas)
+export const createExam = async (examData: Omit<Exam, 'id' | 'ownerId' | 'createdAt'>) => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) throw new Error('User not authenticated');
+  
+  const path = 'exams';
+  try {
+    const docRef = await addDoc(collection(db, path), {
+      ...examData,
+      ownerId: userId,
+      createdAt: Timestamp.now()
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+};
+
+export const updateExam = async (id: string, examData: Partial<Exam>) => {
+  const path = `exams/${id}`;
+  try {
+    await updateDoc(doc(db, 'exams', id), {
+      ...examData,
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+};
+
+export const deleteExam = async (id: string) => {
+  const path = `exams/${id}`;
+  try {
+    await deleteDoc(doc(db, 'exams', id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+};
+
+export const subscribeToExams = (turmaId: string, callback: (exams: Exam[]) => void) => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) return () => {};
+  
+  const path = 'exams';
   const q = query(
     collection(db, path),
     where('turmaId', '==', turmaId),
-    where('ownerId', '==', ownerId),
+    where('ownerId', '==', userId),
     orderBy('createdAt', 'desc')
   );
 
   return onSnapshot(q, (snapshot) => {
-    const gabaritos = snapshot.docs.map(doc => ({
+    const exams = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    } as Gabarito));
-    callback(gabaritos);
+    } as Exam));
+    callback(exams);
   }, (error) => {
     handleFirestoreError(error, OperationType.LIST, path);
   });
-}
+};
+
+// Results
+export const saveResult = async (resultData: Omit<Result, 'id' | 'scannedAt'>) => {
+  const path = 'results';
+  try {
+    const docRef = await addDoc(collection(db, path), {
+      ...resultData,
+      scannedAt: Timestamp.now()
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+};
+
+export const subscribeToResults = (examId: string, callback: (results: Result[]) => void) => {
+  const path = 'results';
+  const q = query(
+    collection(db, path),
+    where('examId', '==', examId),
+    orderBy('scannedAt', 'desc')
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const results = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as Result));
+    callback(results);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.LIST, path);
+  });
+};

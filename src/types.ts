@@ -1,33 +1,45 @@
+import { Timestamp } from 'firebase/firestore';
+
+export interface User {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+}
+
 export interface Turma {
   id: string;
   name: string;
   ownerId: string;
-  createdAt: any; // Firestore Timestamp
+  createdAt: Timestamp;
 }
 
-export interface Gabarito {
+export interface Exam {
   id: string;
+  title: string;
   turmaId: string;
-  name: string;
-  answers: string[];
-  choicesCount: number;
   ownerId: string;
-  createdAt: any; // Firestore Timestamp
+  numQuestions: number;
+  choicesCount: number; // e.g., 5 for A-E
+  answerKey: string[]; // ['A', 'B', 'C', ...]
+  createdAt: Timestamp;
 }
 
-export interface AnswerKey {
-  t: string; // title
-  a: string[]; // answers array
-  c: number; // choices count (e.g., 5 for A,B,C,D,E)
-}
-
-export interface GradingResult {
+export interface Result {
+  id: string;
+  examId: string;
+  studentName: string;
+  studentCode?: string;
+  answers: string[];
   score: number;
-  total: number;
-  studentName?: string;
-  details: {
-    question: number;
-    marked: string;
-    correct: boolean;
-  }[];
+  totalQuestions: number;
+  scannedAt: Timestamp;
+  imageUrl?: string;
+}
+
+export interface OMRCorrection {
+  studentName: string;
+  studentCode: string;
+  answers: string[];
+  confidence: number;
 }
